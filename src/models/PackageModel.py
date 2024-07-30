@@ -3,9 +3,7 @@ import numbers
 from pydantic import Field, validator
 from typing import List, Optional, Union, Any, Dict, Literal
 
-from capsules.Yolov5.src.models.PackageModel import ConfigDrawBBoxFalse
-from sdks.novavision.src.base.model import Package, Input, Detection,  Output, Image, Config, Inputs, Configs, Outputs, Response, \
-    Request
+from sdks.novavision.src.base.model import Package, Input, Detection,  Output, Image, Config, Inputs, Configs, Outputs, Response, Request
 
 
 class InputImage(Input):
