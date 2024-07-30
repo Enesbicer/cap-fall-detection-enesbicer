@@ -1,14 +1,16 @@
 import numbers
 
 from pydantic import Field, validator
-from typing import List, Optional, Union, Any, Dict,Literal
+from typing import List, Optional, Union, Any, Dict, Literal
 
-from sdks.novavision.src.base.model import Package,Input, Output, Image, Config, Inputs, Configs, Outputs, Response, Request
+from capsules.Yolov5.src.models.PackageModel import ConfigDrawBBoxFalse
+from sdks.novavision.src.base.model import Package, Input, Detection,  Output, Image, Config, Inputs, Configs, Outputs, Response, \
+    Request
 
 
 class InputImage(Input):
     name: Literal["inputImage"] = "inputImage"
-    value: Union[List[Image],Image]
+    value: Union[List[Image], Image]
     type = "object"
 
     @validator("type", pre=True, always=True)
@@ -21,26 +23,45 @@ class InputImage(Input):
 
     class Config:
         title = "Images"
+class OutputImage(Output):
+    name: Literal["outputImage"] = "outputImage"
+    value: Union[List[Image],Image]
+    type = "object"
 
-class OutputData(Output):
-    name: Literal["outputData"] = "outputData"
-    value: List
+    @validator("type", pre=True, always=True)
+    def set_type_based_on_value(cls, value, values):
+        value = values.get('value')
+        if isinstance(value, Image):
+            return "object"
+        elif isinstance(value, list):
+            return "list"
+
+
+class Detection(Detection):
+    imgUID: str
+
+
+class OutputDetections(Output):
+    name: Literal["outputDetections"] = "outputDetections"
+    value: List[Detection]
     type: Literal["list"] = "list"
 
+    class Config:
+        title = "Detections"
 
-class configTypeSegmentation(Config):
-    name: Literal["segmentation"] = "segmentation"
-    value: Literal["segmentation"] = "segmentation"
+class configTypeDetection(Config):
+    name: Literal["detection"] = "detection"
+    value: Literal["detection"] = "detection"
     type: Literal["string"] = "string"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Segmentation"
+        title = "detection"
 
 
 class ConfigType(Config):
     name: Literal["configType"] = "configType"
-    value: Union[configTypeSegmentation]
+    value: Union[configTypeDetection]
     type: Literal["object"] = "object"
     field: Literal["dropdownlist"] = "dropdownlist"
 
@@ -48,78 +69,58 @@ class ConfigType(Config):
         title = "Type"
 
 
-class SegmentationInputs(Inputs):
+# principle 7
+class DetectionInputs(Inputs):
     inputImage: InputImage
 
 
+class ConfigDrawBBoxTrue(Config):
+    name: Literal["True"] = "True"
+    value: Literal[True] = True
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
 
-class SegmentationConfigs(Configs):
+    class Config:
+        title = "Enable"
+
+
+class ConfigDrawBBoxFalse(Config):
+    name: Literal["False"] = "False"
+    value: Literal[False] = False
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Disable"
+
+
+class ConfigDrawBBox(Config):
+    name: Literal["DrawBBox"] = "DrawBBox"
+    value: Union[ConfigDrawBBoxTrue, ConfigDrawBBoxFalse]
+    type: Literal["object"] = "object"
+    field: Literal["dropdownlist"] = "dropdownlist"
+
+    class Config:
+        title = "Draw BBox"
+
+
+class DetectionConfigs(Configs):
     configType: ConfigType
+    configDrawBBox: ConfigDrawBBox
+
+class DetectionOutputs(Outputs):
+    outputImage: OutputImage
+    outputDetections: OutputDetections
+
+# principle 6
+class DetectionResponse(Response):
+    outputs: DetectionOutputs
 
 
-
-class SegmentationOutputs(Outputs):
-    outputData: OutputData
-
-
-
-class SegmentationRequest(Request):
-    inputs: Optional[SegmentationInputs]
-    configs: SegmentationConfigs
-    class Config:
-        schema_extra = {
-            "target": "configs"
-        }
-
-
-class SegmentationResponse(Response):
-    outputs: SegmentationOutputs
-
-
-
-class SegmentationExecutor(Config):
-    name: Literal["Segmentation"] = "Segmentation"
-    value: Union[SegmentationRequest, SegmentationResponse]
-    type: Literal["object"] = "object"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Segmentation"
-        schema_extra = {
-            "target": {
-                "value": 0
-            }
-        }
-
-
-class BatchSize(Config):
-    name: Literal["BatchSize"] = "BatchSize"
-    value: int = Field(ge=1, le=100)
-    type: Literal["number"] = "number"
-    field: Literal["textInput"] = "textInput"
-
-    class Config:
-        title = "Batch Size"
-
-
-class Path(Config):
-    name: Literal["path"] = "path"
-    value: str
-    type: Literal["string"] = "string"
-    field: Literal["textInput"] = "textInput"
-
-    class Config:
-        title = "Path"
-
-class TrainConfigs(Configs):
-    configPath: Path
-    batchSize: BatchSize
-
-class TrainOutputs(Outputs):
-    outputData: OutputData
-
-class TrainRequest(Request):
-    configs: TrainConfigs
+# principle 5
+class DetectionRequest(Request):
+    inputs: Optional[DetectionInputs]
+    configs: DetectionConfigs
 
     class Config:
         schema_extra = {
@@ -127,18 +128,15 @@ class TrainRequest(Request):
         }
 
 
-class TrainResponse(Response):
-    outputs: TrainOutputs
-
-
-class TrainExecutor(Config):
-    name: Literal["Train"] = "Train"
-    value: Union[TrainRequest, TrainResponse]
+# principle 4
+class DetectionExecutor(Config):
+    name: Literal["Detection"] = "Detection"
+    value: Union[DetectionRequest, DetectionResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Train"
+        title = "Detection"
         schema_extra = {
             "target": {
                 "value": 0
@@ -146,23 +144,28 @@ class TrainExecutor(Config):
         }
 
 
-
+# Principle 3
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: Union[SegmentationExecutor,TrainExecutor]
-    type:Literal["executor"] = "executor"
+    value: Union[DetectionExecutor]
+    type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
     class Config:
         title = "Task"
+        schema_extra = {
+            "target": "value"
+        }
 
 
+# Principle 2
 class PackageConfigs(Configs):
     executor: ConfigExecutor
 
 
+# Principle 1
 class PackageModel(Package):
     configs: PackageConfigs
     type: Literal["capsule"] = "capsule"
-    name: Literal["Segmentation"] = "Segmentation"
+    name: Literal["Detection"] = "Detection"
     uID = "1221112"
