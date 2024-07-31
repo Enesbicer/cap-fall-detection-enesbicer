@@ -71,6 +71,17 @@ class ConfigType(Config):
 class DetectionInputs(Inputs):
     inputImage: InputImage
 
+class ConfigConfidentThreshold(Config):
+    """
+        Detected Objects with a confidence score below this threshold will be ignored or filtered out.
+    """
+    name: Literal["ConfidentThreshold"] = "ConfidentThreshold"
+    value: float = Field(default=0.3, ge=0, le=1)
+    type: Literal["number"] = "number"
+    field: Literal["textInput"] = "textInput"
+
+    class Config:
+        title = "Confidence Threshold"
 
 class ConfigDrawBBoxTrue(Config):
     name: Literal["True"] = "True"
@@ -81,6 +92,58 @@ class ConfigDrawBBoxTrue(Config):
     class Config:
         title = "Enable"
 
+class ConfigHalfTrue(Config):
+    name: Literal["True"] = "True"
+    value: Literal[True] = True
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Enable"
+
+
+class ConfigHalfFalse(Config):
+    name: Literal["False"] = "False"
+    value: Literal[False] = False
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Disable"
+
+
+class ConfigHalf(Config):
+    """
+        It enables half-precision (FP16) inference, which can speed up model inference.
+    """
+    name: Literal["Half"] = "Half"
+    value: Union[ConfigHalfTrue, ConfigHalfFalse]
+    type: Literal["object"] = "object"
+    field: Literal["dropdownlist"] = "dropdownlist"
+    restart: Literal[True] = True
+
+    class Config:
+        title = "Half"
+
+class ConfigDeviceGPU(Config):
+    name: Literal["ConfigDeviceGPU"] = "ConfigDeviceGPU"
+    configHalf: ConfigHalf
+    value: Literal["GPU"] = "GPU"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "GPU"
+
+
+class ConfigDeviceCPU(Config):
+    name: Literal["ConfigDeviceCPU"] = "ConfigDeviceCPU"
+    value: Literal["CPU"] = "CPU"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "CPU"
 
 class ConfigDrawBBoxFalse(Config):
     name: Literal["False"] = "False"
@@ -91,6 +154,19 @@ class ConfigDrawBBoxFalse(Config):
     class Config:
         title = "Disable"
 
+class ConfigDevice(Config):
+    """
+        It refers to whether the model should run on a CPU or a GPU.
+        You can select the device type for inference or training process.
+    """
+    name: Literal["ConfigDevice"] = "ConfigDevice"
+    value: Union[ConfigDeviceCPU, ConfigDeviceGPU]
+    type: Literal["object"] = "object"
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    restart: Literal[True] = True
+
+    class Config:
+        title = "Device"
 
 class ConfigDrawBBox(Config):
     name: Literal["DrawBBox"] = "DrawBBox"
@@ -103,8 +179,9 @@ class ConfigDrawBBox(Config):
 
 
 class DetectionConfigs(Configs):
-    configType: ConfigType
+    configDevice: ConfigDevice
     configDrawBBox: ConfigDrawBBox
+    configConfidentThreshold: ConfigConfidentThreshold
 
 class DetectionOutputs(Outputs):
     outputImage: OutputImage
