@@ -205,7 +205,7 @@ class DetectionRequest(Request):
 
 # principle 4
 class DetectionExecutor(Config):
-    name: Literal["Detection"] = "Detection"
+    name: Literal["FallDetection"] = "FallDetection"
     value: Union[DetectionRequest, DetectionResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
@@ -242,5 +242,5 @@ class PackageConfigs(Configs):
 class PackageModel(Package):
     configs: PackageConfigs
     type: Literal["capsule"] = "capsule"
-    name: Literal["Detection"] = "Detection"
+    name: Literal["FallDetection"] = "FallDetection"
     uID = "1221112"
