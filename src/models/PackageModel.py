@@ -83,51 +83,9 @@ class ConfigConfidentThreshold(Config):
     class Config:
         title = "Confidence Threshold"
 
-class ConfigDrawBBoxTrue(Config):
-    name: Literal["True"] = "True"
-    value: Literal[True] = True
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Enable"
-
-class ConfigHalfTrue(Config):
-    name: Literal["True"] = "True"
-    value: Literal[True] = True
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Enable"
-
-
-class ConfigHalfFalse(Config):
-    name: Literal["False"] = "False"
-    value: Literal[False] = False
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Disable"
-
-
-class ConfigHalf(Config):
-    """
-        It enables half-precision (FP16) inference, which can speed up model inference.
-    """
-    name: Literal["Half"] = "Half"
-    value: Union[ConfigHalfTrue, ConfigHalfFalse]
-    type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist"
-    restart: Literal[True] = True
-
-    class Config:
-        title = "Half"
 
 class ConfigDeviceGPU(Config):
     name: Literal["ConfigDeviceGPU"] = "ConfigDeviceGPU"
-    configHalf: ConfigHalf
     value: Literal["GPU"] = "GPU"
     type: Literal["string"] = "string"
     field: Literal["option"] = "option"
@@ -145,15 +103,6 @@ class ConfigDeviceCPU(Config):
     class Config:
         title = "CPU"
 
-class ConfigDrawBBoxFalse(Config):
-    name: Literal["False"] = "False"
-    value: Literal[False] = False
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Disable"
-
 class ConfigDevice(Config):
     """
         It refers to whether the model should run on a CPU or a GPU.
@@ -167,6 +116,25 @@ class ConfigDevice(Config):
 
     class Config:
         title = "Device"
+
+class ConfigDrawBBoxFalse(Config):
+    name: Literal["False"] = "False"
+    value: Literal[False] = False
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Disable"
+
+class ConfigDrawBBoxTrue(Config):
+    name: Literal["True"] = "True"
+    value: Literal[True] = True
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Enable"
+
 
 class ConfigDrawBBox(Config):
     name: Literal["DrawBBox"] = "DrawBBox"
