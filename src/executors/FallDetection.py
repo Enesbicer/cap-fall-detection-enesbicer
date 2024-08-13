@@ -21,7 +21,8 @@ from sdks.novavision.src.base.model import BoundingBox
 from capsules.FallDetection.src.models.PackageModel import PackageConfigs, ConfigExecutor, PackageModel, OutputImage, \
     OutputDetections, DetectionOutputs, DetectionExecutor, DetectionResponse, Detection
 
-from capsules.FallDetection.src.utils.utils import load_models
+from capsules.FallDetection.src.utils.utils import load_models, select_device
+
 
 class FallDetection(Capsule):
     def __init__(self, request, bootstrap={}):
@@ -49,9 +50,8 @@ class FallDetection(Capsule):
         return model
 
     def infer(self, image):
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model.to(device)
-        if str(self.device).lower() == "gpu" and device == "cuda":
+        device = select_device()
+        if str(self.device).lower() == "gpu" and device == "cuda:0":
             self.half = self.request.get_param("Half")
             if self.half:
                 output = self.model.predict(image, conf=self.conf_thres, iou=self.iou_thres, half=True)
@@ -60,6 +60,7 @@ class FallDetection(Capsule):
         else:
             output = self.model.predict(image, conf=self.conf_thres, iou=self.iou_thres)
         im = output[0].plot()
+
         return output, im
 
     def output_result(self, output, img_uid):
