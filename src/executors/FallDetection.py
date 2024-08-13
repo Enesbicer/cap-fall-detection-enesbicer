@@ -38,9 +38,9 @@ class FallDetection(Capsule):
         self.draw_bbox = self.request.get_param("DrawBBox")
         self.device = self.request.get_param("ConfigDevice")
         self.conf_thres = self.request.get_param("ConfidentThreshold")
+        self.iou_thres = self.request.get_param("IOUThreshold")
         self.images = self.request.get_param("inputImage")
         self.is_list = Image.is_list(self.images)
-        self.weight_path = "/storage/fall_model.pt"
         self.namedict = {"0": "Fall"}
 
     @staticmethod
@@ -49,9 +49,16 @@ class FallDetection(Capsule):
         return model
 
     def infer(self, image):
-        device = "cuda" if str(self.device).lower() == "gpu" else "cpu"
+        device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model.to(device)
-        output = self.model.predict(image)
+        if str(self.device).lower() == "gpu" and device == "cuda":
+            self.half = self.request.get_param("Half")
+            if self.half:
+                output = self.model.predict(image, conf=self.conf_thres, iou=self.iou_thres, half=True)
+            else:
+                output = self.model.predict(image, conf=self.conf_thres, iou=self.iou_thres)
+        else:
+            output = self.model.predict(image, conf=self.conf_thres, iou=self.iou_thres)
         im = output[0].plot()
         return output, im
 
@@ -88,6 +95,7 @@ class FallDetection(Capsule):
                            encoding=img.encoding,
                            value=img.value,
                            type=img.type)
+
         return image, output_detection_list
 
     def run(self):
