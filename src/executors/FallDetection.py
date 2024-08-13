@@ -43,6 +43,7 @@ class FallDetection(Capsule):
         self.images = self.request.get_param("inputImage")
         self.is_list = Image.is_list(self.images)
         self.namedict = {"0": "Fall"}
+        self.select_device = select_device()
 
     @staticmethod
     def bootstrap():
@@ -50,8 +51,7 @@ class FallDetection(Capsule):
         return model
 
     def infer(self, image):
-        device = select_device()
-        if str(self.device).lower() == "gpu" and device == "cuda:0":
+        if str(self.device).lower() == "gpu" and self.select_device == "cuda:0":
             self.half = self.request.get_param("Half")
             if self.half:
                 output = self.model.predict(image, conf=self.conf_thres, iou=self.iou_thres, half=True)
