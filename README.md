@@ -1,6 +1,6 @@
 <!-- ABOUT THE CAPSULE -->
 ## About The Capsule
-<div align= center><img src="resources/fall_people.jpg"/ height="500"></div>
+<div align= center><img src="resources/fall_people.png"/ height="500"></div>
 
 
 Capsule is a structure trained with a custom YOLOv8 dataset. The capsule consists of 5 configurations: 4 main configurations and 1 configuration under the device setting.
