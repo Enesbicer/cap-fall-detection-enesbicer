@@ -42,7 +42,7 @@ Clone the repo to under your image.
 <!-- USAGE EXAMPLES -->
 ## Train
 You can use this [Notebook](https://colab.research.google.com/drive/1UCSDuAaQYVvIUMP7pDvu0Kc6rX94XAFz?usp=sharing) to train model.
-First of all we need to dataset to train model in my model I used this [Roboflow Dataset](https://universe.roboflow.com/roboflow-universe-projects/fall-detection-ca3o8/dataset/4)
+First of all we need to dataset to train model. In my model I used this [Roboflow Dataset](https://universe.roboflow.com/roboflow-universe-projects/fall-detection-ca3o8/dataset/4)
 In dataset 9444 Train, 899 valid, 450 test image available and you can download it any way format.
 In the Notebook in first section here
 ```python
@@ -52,7 +52,7 @@ project = rf.workspace("roboflow-universe-projects").project("fall-detection-ca3
 version = project.version(4)
 dataset = version.download("yolov8")
 ```
-You need to enter your account api key
+You need to enter your account api key.
 
 
 
