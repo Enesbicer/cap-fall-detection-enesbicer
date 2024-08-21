@@ -59,7 +59,7 @@ You need to enter your account api key.
 <!-- Resources -->
 ## Resources
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
+List of the resources you find helpful.
 
 * [Yolov8 Training with Custom Dataset](https://www.youtube.com/watch?v=LNwODJXcvt4)
 * [Train Notebook](https://colab.research.google.com/drive/1UCSDuAaQYVvIUMP7pDvu0Kc6rX94XAFz?usp=sharing)
