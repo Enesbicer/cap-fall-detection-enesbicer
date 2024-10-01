@@ -92,12 +92,9 @@ class FallDetection(Capsule):
 
         output_detection_list = self.output_result(output, img.uID)
 
-        image = ImageModel(name=img.name, uID=img.uID, mimeType=img.mimeType,
-                           encoding=img.encoding,
-                           value=img.value,
-                           type=img.type)
+        #image = ImageModel(name=img.name, uID=img.uID, mimeType=img.mimeType, encoding=img.encoding, value=img.value, type=img.type)
 
-        return image, output_detection_list
+        return img, output_detection_list
 
     def run(self):
         if self.is_list:
@@ -114,8 +111,11 @@ class FallDetection(Capsule):
             img = Image.get_image(img=self.images, bootstrap=self.bootstrap)
             img, detects = self.detection_inference(img)
             output_detection_list = detects
+
+            a = Image.encode64(img)
+
             imageList = Image.set_image(img=img, package_uID=self.request.model.uID, bootstrap=self.bootstrap)
-            #imageList = Image.encode64(img)
+
 
         output_image = OutputImage(value=imageList)
         outputDetections = OutputDetections(value=output_detection_list)
@@ -130,8 +130,7 @@ class FallDetection(Capsule):
         self.now = datetime.now()
         print(f"Stop :", self.now.strftime("%Y-%m-%d %H:%M:%S:%f")[:-3], '\n\n')
 
-        return Response(model=packageModel, bootstrap=self.bootstrap, mode_debug=self.debug).response()
-
+        return Response(model=packageModel, bootstrap=self.bootstrap, debug=self.debug).response()
 
 if "__main__" == __name__:
     from sdks.novavision.src.base.application import Application
