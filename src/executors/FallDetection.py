@@ -46,7 +46,7 @@ class FallDetection(Capsule):
         self.select_device = select_device()
 
     @staticmethod
-    def bootstrap():
+    def bootstrap() -> dict:
         model = load_models()
         return model
 
@@ -112,7 +112,7 @@ class FallDetection(Capsule):
             img, detects = self.detection_inference(img)
             output_detection_list = detects
 
-            a = Image.encode64(img)
+            #a = Image.encode64(img)
 
             imageList = Image.set_image(img=img, package_uID=self.request.model.uID, bootstrap=self.bootstrap)
 
