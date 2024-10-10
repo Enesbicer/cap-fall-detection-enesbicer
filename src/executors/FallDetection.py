@@ -25,7 +25,7 @@ from capsules.FallDetection.src.utils.utils import load_models, select_device
 
 
 class FallDetection(Capsule):
-    def __init__(self, request, bootstrap={}):
+    def __init__(self, request, bootstrap):
         self.error_list = []
         super().__init__(request)
         self.start_time = datetime.now()
@@ -43,7 +43,6 @@ class FallDetection(Capsule):
         self.images = self.request.get_param("inputImage")
         self.is_list = Image.is_list(self.images)
         self.namedict = {"0": "Fall"}
-        self.select_device = select_device()
 
     @staticmethod
     def bootstrap() -> dict:
@@ -51,7 +50,7 @@ class FallDetection(Capsule):
         return model
 
     def infer(self, image):
-        if str(self.device).lower() == "gpu" and self.select_device == "cuda:0":
+        if str(self.device).lower() == "gpu" and select_device() == "cuda:0":
             self.half = self.request.get_param("Half")
             if self.half:
                 output = self.model.predict(image, conf=self.conf_thres, iou=self.iou_thres, half=True)
@@ -92,8 +91,6 @@ class FallDetection(Capsule):
 
         output_detection_list = self.output_result(output, img.uID)
 
-        #image = ImageModel(name=img.name, uID=img.uID, mimeType=img.mimeType, encoding=img.encoding, value=img.value, type=img.type)
-
         return img, output_detection_list
 
     def run(self):
@@ -101,20 +98,17 @@ class FallDetection(Capsule):
             data_imgs = []
             detection_list = []
             for img in self.images:
-                img = Image.get_image(img, self.debug)
+                img = Image.get_frame(img, self.debug)
                 img, detects = self.detection_inference(img)
                 detection_list.extend(detects)
                 data_imgs.append(img)
             output_detection_list = detection_list
             imageList = data_imgs
         else:
-            img = Image.get_image(img=self.images, bootstrap=self.bootstrap)
+            img = Image.get_frame(img=self.images, bootstrap=self.bootstrap)
             img, detects = self.detection_inference(img)
             output_detection_list = detects
-
-            #a = Image.encode64(img)
-
-            imageList = Image.set_image(img=img, package_uID=self.request.model.uID, bootstrap=self.bootstrap)
+            imageList = Image.set_frame(img=img, package_uID=self.request.model.uID, bootstrap=self.bootstrap)
 
 
         output_image = OutputImage(value=imageList)
