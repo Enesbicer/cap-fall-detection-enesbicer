@@ -20,7 +20,7 @@ ENDPOINT_URL = "http://127.0.0.1:8000/api"
 
 def inference():
     image_data = Image(name="image", uID="323332", mimeType="image/jpg", encoding="base64", value=np.asarray(
-        cv2.imread('capsules/FallDetection/resources/fall_people.jpg')).astype(np.float32),
+        cv2.imread('capsules/FallDetection/resources/fall_people.png')).astype(np.float32),
                        type="Image")
     image_data = image.encode64(image_data)
 
