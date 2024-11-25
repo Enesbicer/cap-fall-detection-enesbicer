@@ -69,14 +69,13 @@ class FallDetection(Capsule):
     def detection_inference(self, img):
         output, im = self.infer(np.array(img.value))
         output_detection_list = self.output_result(output, img.uID)
-        image = ImageModel(name=img.name, uID=img.uID, mimeType=img.mimeType, encoding=img.encoding, value=img.value,
-                           type=img.type)
+        image = ImageModel(name=img.name, uID=img.uID, mimeType=img.mimeType, encoding=img.encoding, value=img.value, type=img.type)
         return image, output_detection_list
 
     def run(self):
         self.image = Image.get_frame(img=self.image, redis_db=self.redis_db)
         self.image, self.detection = self.detection_inference(self.image)
-        self.image = Image.set_frame(img=self.image, package_uID=self.request.model.uID, redis_db=self.redis_db)
+        self.image = Image.set_frame(img=self.image, package_uID=self.uID, redis_db=self.redis_db)
         packageModel = build_response(context=self)
         return Response(model=packageModel, bootstrap=self.bootstrap).response()
 
