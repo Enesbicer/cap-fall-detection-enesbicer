@@ -18,7 +18,6 @@ from capsules.FallDetection.src.models.PackageModel import PackageModel, Detecti
 
 class FallDetection(Capsule):
     def __init__(self, request, bootstrap):
-        self.error_list = []
         super().__init__(request)
         self.request.model = PackageModel(**(self.request.data))
         self.initialize_request_data(request, bootstrap)
