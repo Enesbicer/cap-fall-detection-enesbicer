@@ -1,16 +1,14 @@
+
 import os
-from ultralytics import YOLO
 import torch
 import platform
 
-from sdks.novavision.src.base.application import Application
+from ultralytics import YOLO
 from sdks.novavision.src.base.download import Download
-
 
 weight_fall_path = '/storage/fall_model.pt'
 weight_url = 'https://drive.google.com/file/d/1Q67vzqE5z1PW0gw8vm54xZK04x_mybnp/view?usp=sharing'
 output_directory = '/storage/'
-
 
 def select_device(device='', batch_size=0, newline=True):
     s = f'PyTorch Python-{platform.python_version()} torch-{torch.__version__} '
@@ -46,23 +44,17 @@ def select_device(device='', batch_size=0, newline=True):
     return device
 
 def load_models():
-    models = {}
     model = {}
-    application = Application()
-    app_param_task = application.get_app_param("FallDetection", "ConfigExecutor")
-    for i in app_param_task:
-        key = str(list(i.keys())[0])
-        config_device = i[key]['configs']['configDevice']['value']['value']
-        device = select_device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    device = select_device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    model['device'] = device
 
+    if not os.path.exists(weight_fall_path):
+        if Download.download_from_drive(weight_url, weight_fall_path) is not None:
+            print(f"Model download successfully: {'fall_model.pt'}")
+        else:
+            print(f"Model download failed: {'fall_model.pt'}")
 
-        if not os.path.exists(weight_fall_path):
-            if Download.download_from_drive(weight_url, weight_fall_path) is not None:
-                print(f"Model download successfully: {'fall_model.pt'}")
-            else:
-                print(f"Model download failed: {'fall_model.pt'}")
-
-        yolo_model = YOLO(weight_fall_path)
-        yolo_model.to(device)
-        model["model"] = yolo_model
-        return model
+    yolo_model = YOLO(weight_fall_path)
+    yolo_model.to(device)
+    model["model"] = yolo_model
+    return model

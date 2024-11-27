@@ -1,39 +1,24 @@
-import numbers
-
 from pydantic import Field, validator
 from typing import List, Optional, Union, Any, Dict, Literal
-
 from sdks.novavision.src.base.model import Package, Input, Detection,  Output, Image, Config, Inputs, Configs, Outputs, Response, Request
 
 
 class InputImage(Input):
     name: Literal["inputImage"] = "inputImage"
-    value: Union[List[Image], Image]
+    value: Image
     type = "object"
 
-    @validator("type", pre=True, always=True)
-    def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
-            return "object"
-        elif isinstance(value, list):
-            return "list"
-
     class Config:
-        title = "Images"
+        title = "Image"
+
 
 class OutputImage(Output):
     name: Literal["outputImage"] = "outputImage"
-    value: Union[List[Image],Image]
+    value: Image
     type = "object"
 
-    @validator("type", pre=True, always=True)
-    def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
-            return "object"
-        elif isinstance(value, list):
-            return "list"
+    class Config:
+        title = "Image"
 
 
 class Detection(Detection):
@@ -48,29 +33,10 @@ class OutputDetections(Output):
     class Config:
         title = "Detections"
 
-class configTypeDetection(Config):
-    name: Literal["detection"] = "detection"
-    value: Literal["detection"] = "detection"
-    type: Literal["string"] = "string"
-    field: Literal["option"] = "option"
 
-    class Config:
-        title = "detection"
-
-
-class ConfigType(Config):
-    name: Literal["configType"] = "configType"
-    value: Union[configTypeDetection]
-    type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist"
-
-    class Config:
-        title = "Type"
-
-
-# principle 7
 class DetectionInputs(Inputs):
     inputImage: InputImage
+
 
 class ConfigIOUThreshold(Config):
     """
@@ -84,6 +50,7 @@ class ConfigIOUThreshold(Config):
     class Config:
         title = "IOU Threshold"
 
+
 class ConfigConfidentThreshold(Config):
     """
         Detected Objects with a confidence score below this threshold will be ignored or filtered out.
@@ -96,14 +63,6 @@ class ConfigConfidentThreshold(Config):
     class Config:
         title = "Confidence Threshold"
 
-class ConfigDrawBBoxTrue(Config):
-    name: Literal["True"] = "True"
-    value: Literal[True] = True
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Enable"
 
 class ConfigHalfTrue(Config):
     name: Literal["True"] = "True"
@@ -138,6 +97,7 @@ class ConfigHalf(Config):
     class Config:
         title = "Half"
 
+
 class ConfigDeviceGPU(Config):
     name: Literal["ConfigDeviceGPU"] = "ConfigDeviceGPU"
     configHalf: ConfigHalf
@@ -158,14 +118,6 @@ class ConfigDeviceCPU(Config):
     class Config:
         title = "CPU"
 
-class ConfigDrawBBoxFalse(Config):
-    name: Literal["False"] = "False"
-    value: Literal[False] = False
-    type: Literal["bool"] = "bool"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Disable"
 
 class ConfigDevice(Config):
     """
@@ -181,32 +133,22 @@ class ConfigDevice(Config):
     class Config:
         title = "Device"
 
-class ConfigDrawBBox(Config):
-    name: Literal["DrawBBox"] = "DrawBBox"
-    value: Union[ConfigDrawBBoxTrue, ConfigDrawBBoxFalse]
-    type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist"
-
-    class Config:
-        title = "Draw BBox"
-
 
 class DetectionConfigs(Configs):
     configDevice: ConfigDevice
-    configDrawBBox: ConfigDrawBBox
     configConfidentThreshold: ConfigConfidentThreshold
     configIOUThreshold: ConfigIOUThreshold
+
 
 class DetectionOutputs(Outputs):
     outputImage: OutputImage
     outputDetections: OutputDetections
 
-# principle 6
+
 class DetectionResponse(Response):
     outputs: DetectionOutputs
 
 
-# principle 5
 class DetectionRequest(Request):
     inputs: Optional[DetectionInputs]
     configs: DetectionConfigs
@@ -217,7 +159,6 @@ class DetectionRequest(Request):
         }
 
 
-# principle 4
 class DetectionExecutor(Config):
     name: Literal["FallDetection"] = "FallDetection"
     value: Union[DetectionRequest, DetectionResponse]
@@ -233,7 +174,6 @@ class DetectionExecutor(Config):
         }
 
 
-# Principle 3
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
     value: Union[DetectionExecutor]
@@ -247,12 +187,10 @@ class ConfigExecutor(Config):
         }
 
 
-# Principle 2
 class PackageConfigs(Configs):
     executor: ConfigExecutor
 
 
-# Principle 1
 class PackageModel(Package):
     configs: PackageConfigs
     type: Literal["capsule"] = "capsule"
