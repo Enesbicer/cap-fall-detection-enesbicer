@@ -29,7 +29,7 @@ class FallDetection(Capsule):
         self.device = self.request.get_param("ConfigDevice")
         self.conf_weights = self.request.get_param("Weights")
         self.iou_thres = self.request.get_param("IOUThreshold")
-        self.conf_thres = self.request.get_param("ConfidentThreshold"),
+        self.conf_thres = self.request.get_param("ConfidentThreshold")
 
     @staticmethod
     def bootstrap() -> dict:
