@@ -1,125 +1,157 @@
-import numbers
-
 from pydantic import Field, validator
-from typing import List, Optional, Union, Any, Dict,Literal
-
-from sdks.novavision.src.base.model import Package,Input, Output, Image, Config, Inputs, Configs, Outputs, Response, Request
+from typing import List, Optional, Union, Any, Dict, Literal
+from sdks.novavision.src.base.model import Package, Input, Detection,  Output, Image, Config, Inputs, Configs, Outputs, Response, Request
 
 
 class InputImage(Input):
     name: Literal["inputImage"] = "inputImage"
-    value: Union[List[Image],Image]
+    value: Image
     type = "object"
 
-    @validator("type", pre=True, always=True)
-    def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
-            return "object"
-        elif isinstance(value, list):
-            return "list"
+    class Config:
+        title = "Image"
+
+
+class OutputImage(Output):
+    name: Literal["outputImage"] = "outputImage"
+    value: Image
+    type = "object"
 
     class Config:
-        title = "Images"
+        title = "Image"
 
-class OutputData(Output):
-    name: Literal["outputData"] = "outputData"
-    value: List
+
+class Detection(Detection):
+    imgUID: str
+
+
+class OutputDetections(Output):
+    name: Literal["outputDetections"] = "outputDetections"
+    value: List[Detection]
     type: Literal["list"] = "list"
 
-
-class configTypeSegmentation(Config):
-    name: Literal["segmentation"] = "segmentation"
-    value: Literal["segmentation"] = "segmentation"
-    type: Literal["string"] = "string"
-    field: Literal["option"] = "option"
-
     class Config:
-        title = "Segmentation"
+        title = "Detections"
 
 
-class ConfigType(Config):
-    name: Literal["configType"] = "configType"
-    value: Union[configTypeSegmentation]
-    type: Literal["object"] = "object"
-    field: Literal["dropdownlist"] = "dropdownlist"
-
-    class Config:
-        title = "Type"
-
-
-class SegmentationInputs(Inputs):
+class DetectionInputs(Inputs):
     inputImage: InputImage
 
 
-
-class SegmentationConfigs(Configs):
-    configType: ConfigType
-
-
-
-class SegmentationOutputs(Outputs):
-    outputData: OutputData
-
-
-
-class SegmentationRequest(Request):
-    inputs: Optional[SegmentationInputs]
-    configs: SegmentationConfigs
-    class Config:
-        schema_extra = {
-            "target": "configs"
-        }
-
-
-class SegmentationResponse(Response):
-    outputs: SegmentationOutputs
-
-
-
-class SegmentationExecutor(Config):
-    name: Literal["Segmentation"] = "Segmentation"
-    value: Union[SegmentationRequest, SegmentationResponse]
-    type: Literal["object"] = "object"
-    field: Literal["option"] = "option"
-
-    class Config:
-        title = "Segmentation"
-        schema_extra = {
-            "target": {
-                "value": 0
-            }
-        }
-
-
-class BatchSize(Config):
-    name: Literal["BatchSize"] = "BatchSize"
-    value: int = Field(ge=1, le=100)
+class ConfigIOUThreshold(Config):
+    """
+        It is necessary for Non-Maximum Suppression (NMS) which is used to filter redundant bounding boxes for the same object. A higher IOU threshold will result in fewer bounding boxes after NMS.
+    """
+    name: Literal["IOUThreshold"] = "IOUThreshold"
+    value: float = Field(default=0.7, ge=0, le=1)
     type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
 
     class Config:
-        title = "Batch Size"
+        title = "IOU Threshold"
 
 
-class Path(Config):
-    name: Literal["path"] = "path"
-    value: str
-    type: Literal["string"] = "string"
+class ConfigConfidentThreshold(Config):
+    """
+        Detected Objects with a confidence score below this threshold will be ignored or filtered out.
+    """
+    name: Literal["ConfidentThreshold"] = "ConfidentThreshold"
+    value: float = Field(default=0.3, ge=0, le=1)
+    type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
 
     class Config:
-        title = "Path"
+        title = "Confidence Threshold"
 
-class TrainConfigs(Configs):
-    configPath: Path
-    batchSize: BatchSize
 
-class TrainOutputs(Outputs):
-    outputData: OutputData
+class ConfigHalfTrue(Config):
+    name: Literal["True"] = "True"
+    value: Literal[True] = True
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
 
-class TrainRequest(Request):
-    configs: TrainConfigs
+    class Config:
+        title = "Enable"
+
+
+class ConfigHalfFalse(Config):
+    name: Literal["False"] = "False"
+    value: Literal[False] = False
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Disable"
+
+
+class ConfigHalf(Config):
+    """
+        It enables half-precision (FP16) inference, which can speed up model inference.
+    """
+    name: Literal["Half"] = "Half"
+    value: Union[ConfigHalfTrue, ConfigHalfFalse]
+    type: Literal["object"] = "object"
+    field: Literal["dropdownlist"] = "dropdownlist"
+    restart: Literal[True] = True
+
+    class Config:
+        title = "Half"
+
+
+class ConfigDeviceGPU(Config):
+    name: Literal["ConfigDeviceGPU"] = "ConfigDeviceGPU"
+    configHalf: ConfigHalf
+    value: Literal["GPU"] = "GPU"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "GPU"
+
+
+class ConfigDeviceCPU(Config):
+    name: Literal["ConfigDeviceCPU"] = "ConfigDeviceCPU"
+    value: Literal["CPU"] = "CPU"
+    type: Literal["string"] = "string"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "CPU"
+
+
+class ConfigDevice(Config):
+    """
+        It refers to whether the model should run on a CPU or a GPU.
+        You can select the device type for inference or training process.
+    """
+    name: Literal["ConfigDevice"] = "ConfigDevice"
+    value: Union[ConfigDeviceCPU, ConfigDeviceGPU]
+    type: Literal["object"] = "object"
+    field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
+    restart: Literal[True] = True
+
+    class Config:
+        title = "Device"
+
+
+class DetectionConfigs(Configs):
+    configDevice: ConfigDevice
+    configConfidentThreshold: ConfigConfidentThreshold
+    configIOUThreshold: ConfigIOUThreshold
+
+
+class DetectionOutputs(Outputs):
+    outputImage: OutputImage
+    outputDetections: OutputDetections
+
+
+class DetectionResponse(Response):
+    outputs: DetectionOutputs
+
+
+class DetectionRequest(Request):
+    inputs: Optional[DetectionInputs]
+    configs: DetectionConfigs
 
     class Config:
         schema_extra = {
@@ -127,18 +159,14 @@ class TrainRequest(Request):
         }
 
 
-class TrainResponse(Response):
-    outputs: TrainOutputs
-
-
-class TrainExecutor(Config):
-    name: Literal["Train"] = "Train"
-    value: Union[TrainRequest, TrainResponse]
+class DetectionExecutor(Config):
+    name: Literal["FallDetection"] = "FallDetection"
+    value: Union[DetectionRequest, DetectionResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Train"
+        title = "Detection"
         schema_extra = {
             "target": {
                 "value": 0
@@ -146,15 +174,17 @@ class TrainExecutor(Config):
         }
 
 
-
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: Union[SegmentationExecutor,TrainExecutor]
-    type:Literal["executor"] = "executor"
+    value: Union[DetectionExecutor]
+    type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
     class Config:
         title = "Task"
+        schema_extra = {
+            "target": "value"
+        }
 
 
 class PackageConfigs(Configs):
@@ -164,5 +194,5 @@ class PackageConfigs(Configs):
 class PackageModel(Package):
     configs: PackageConfigs
     type: Literal["capsule"] = "capsule"
-    name: Literal["Segmentation"] = "Segmentation"
+    name: Literal["FallDetection"] = "FallDetection"
     uID = "1221112"
