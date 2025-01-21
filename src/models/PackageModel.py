@@ -12,15 +12,6 @@ class InputImage(Input):
         title = "Image"
 
 
-class OutputImage(Output):
-    name: Literal["outputImage"] = "outputImage"
-    value: Image
-    type = "object"
-
-    class Config:
-        title = "Image"
-
-
 class Detection(Detection):
     imgUID: str
 
@@ -141,7 +132,6 @@ class DetectionConfigs(Configs):
 
 
 class DetectionOutputs(Outputs):
-    outputImage: OutputImage
     outputDetections: OutputDetections
 
 
