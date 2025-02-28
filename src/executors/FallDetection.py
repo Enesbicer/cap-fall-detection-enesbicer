@@ -18,9 +18,8 @@ from capsules.FallDetection.src.models.PackageModel import PackageModel, Detecti
 
 class FallDetection(Capsule):
     def __init__(self, request, bootstrap):
-        super().__init__(request)
+        super().__init__(request,bootstrap)
         self.request.model = PackageModel(**(self.request.data))
-        self.initialize_request_data(request, bootstrap)
         self.namedict = {"0": "Fall"}
         self.model = self.bootstrap["model"]
         self.half = self.request.get_param("Half")
