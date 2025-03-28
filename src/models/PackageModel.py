@@ -6,7 +6,7 @@ from sdks.novavision.src.base.model import Package, Input, Detection,  Output, I
 class InputImage(Input):
     name: Literal["inputImage"] = "inputImage"
     value: Image
-    type = "object"
+    type: str = "object"
 
     class Config:
         title = "Image"
@@ -140,11 +140,11 @@ class DetectionResponse(Response):
 
 
 class DetectionRequest(Request):
-    inputs: Optional[DetectionInputs]
+    inputs: Optional[DetectionInputs] = None
     configs: DetectionConfigs
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "target": "configs"
         }
 
@@ -157,7 +157,7 @@ class DetectionExecutor(Config):
 
     class Config:
         title = "Detection"
-        schema_extra = {
+        json_schema_extra = {
             "target": {
                 "value": 0
             }
@@ -172,7 +172,7 @@ class ConfigExecutor(Config):
 
     class Config:
         title = "Task"
-        schema_extra = {
+        json_schema_extra = {
             "target": "value"
         }
 
@@ -185,4 +185,3 @@ class PackageModel(Package):
     configs: PackageConfigs
     type: Literal["capsule"] = "capsule"
     name: Literal["FallDetection"] = "FallDetection"
-    uID = "1221112"

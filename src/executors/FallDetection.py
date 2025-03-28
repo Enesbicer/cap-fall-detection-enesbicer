@@ -18,9 +18,8 @@ from capsules.FallDetection.src.models.PackageModel import PackageModel, Detecti
 
 class FallDetection(Capsule):
     def __init__(self, request, bootstrap):
-        super().__init__(request)
+        super().__init__(request,bootstrap)
         self.request.model = PackageModel(**(self.request.data))
-        self.initialize_request_data(request, bootstrap)
         self.namedict = {"0": "Fall"}
         self.model = self.bootstrap["model"]
         self.half = self.request.get_param("Half")
@@ -71,10 +70,10 @@ class FallDetection(Capsule):
 
     def run(self):
         self.image = Image.get_frame(img=self.image, redis_db=self.redis_db)
-        if not self.image: return None
+        if not img: return Response(context=self).response()
         self.detection = self.detection_inference(self.image)
         packageModel = build_response(context=self)
-        return Response(model=packageModel, bootstrap=self.bootstrap).response()
+        return Response(context=self, model=packageModel).response()
 
 
 if "__main__" == __name__:
