@@ -70,10 +70,10 @@ class FallDetection(Capsule):
 
     def run(self):
         self.image = Image.get_frame(img=self.image, redis_db=self.redis_db)
-        if not self.image: return None
+        if not img: return Response(context=self).response()
         self.detection = self.detection_inference(self.image)
         packageModel = build_response(context=self)
-        return Response(model=packageModel, bootstrap=self.bootstrap).response()
+        return Response(context=self, model=packageModel).response()
 
 
 if "__main__" == __name__:
