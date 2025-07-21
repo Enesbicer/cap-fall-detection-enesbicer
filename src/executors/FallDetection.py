@@ -31,8 +31,8 @@ class FallDetection(Capsule):
         self.conf_thres = self.request.get_param("ConfidentThreshold")
 
     @staticmethod
-    def bootstrap() -> dict:
-        model = load_models()
+    def bootstrap(config: dict) -> dict:
+        model = load_models(config=config).load_model()
         return model
 
     def infer(self, image):
@@ -52,14 +52,17 @@ class FallDetection(Capsule):
         detection_list = []
         for i in range(0, len(bboxes)):
             bbox = BoundingBox(
-                left=bboxes[i][0], top=bboxes[i][1],
+                left=bboxes[i][0],
+                top=bboxes[i][1],
                 width=bboxes[i][2] - bboxes[i][0],
                 height=bboxes[i][3] - bboxes[i][1])
             newdetect = Detection(
-                boundingBox=bbox, confidence=bboxes[i][4],
+                boundingBox=bbox,
+                confidence=bboxes[i][4],
                 classLabel=self.namedict[str(int(bboxes[i][5]))],
                 classId=int(bboxes[i][5]),
-                imgUID=img_uid)
+                imgUID=img_uid
+            )
             detection_list.append(newdetect)
         return detection_list
 
@@ -69,11 +72,12 @@ class FallDetection(Capsule):
         return output_detection_list
 
     def run(self):
-        self.image = Image.get_frame(img=self.image, redis_db=self.redis_db)
-        if not img: return Response(context=self).response()
-        self.detection = self.detection_inference(self.image)
+        img = Image.get_frame(img=self.image, redis_db=self.redis_db)
+        if not img:
+            return Response(context=self).response()
+        self.detection = self.detection_inference(img)
         packageModel = build_response(context=self)
-        return Response(context=self, model=packageModel).response()
+        return packageModel
 
 
 if "__main__" == __name__:

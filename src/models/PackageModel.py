@@ -5,8 +5,16 @@ from sdks.novavision.src.base.model import Package, Input, Detection,  Output, I
 
 class InputImage(Input):
     name: Literal["inputImage"] = "inputImage"
-    value: Image
+    value: Union[List[Image], Image]
     type: str = "object"
+
+    @validator("type", pre=True, always=True)
+    def set_type_based_on_value(cls, value, values):
+        value = values.get('value')
+        if isinstance(value, Image):
+            return "object"
+        elif isinstance(value, list):
+            return "list"
 
     class Config:
         title = "Image"
@@ -25,8 +33,7 @@ class OutputDetections(Output):
         title = "Detections"
 
 
-class DetectionInputs(Inputs):
-    inputImage: InputImage
+
 
 
 class ConfigIOUThreshold(Config):
@@ -124,7 +131,8 @@ class ConfigDevice(Config):
     class Config:
         title = "Device"
 
-
+class DetectionInputs(Inputs):
+    inputImage: InputImage
 class DetectionConfigs(Configs):
     configDevice: ConfigDevice
     configConfidentThreshold: ConfigConfidentThreshold
