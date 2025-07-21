@@ -32,7 +32,7 @@ class FallDetection(Capsule):
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
-        model = load_models(config=config).load_model()
+        model = load_models(config=config)
         return model
 
     def infer(self, image):
