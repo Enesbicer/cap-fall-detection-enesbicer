@@ -43,7 +43,7 @@ def select_device(device='', batch_size=0, newline=True):
     print(s)
     return device
 
-def load_models():
+def load_models(config):
     model = {}
     device = select_device('cuda:0' if torch.cuda.is_available() else 'cpu')
     model['device'] = device
