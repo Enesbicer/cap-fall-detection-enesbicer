@@ -7,6 +7,8 @@ from ultralytics import YOLO
 from sdks.novavision.src.base.download import Download
 from sdks.novavision.src.base.logger import LoggerManager
 
+logger=LoggerManager()
+
 weight_path = '/storage/best.pt'
 weight_url = 'https://drive.google.com/file/d/1Q67vzqE5z1PW0gw8vm54xZK04x_mybnp/view?usp=sharing'
 output_directory = '/storage/'
@@ -36,9 +38,7 @@ def load_models(config):
     model['device'] = device
 
     if not os.path.exists(weight_path):
-        if Download.download_from_drive(weight_url, weight_path) is not None:
-            print(f"Model download successfully: {'fall_model.pt'}")
-        else:
+        if Download.download_from_drive(weight_url, weight_path) is  None:
             logger.error(f"Model download failed!!")
 
     yolo_model = YOLO(weight_path)
