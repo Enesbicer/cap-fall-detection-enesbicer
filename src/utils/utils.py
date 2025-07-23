@@ -1,10 +1,9 @@
 import os
 import torch
-import urllib.request
 from pathlib import Path
 from ultralytics import YOLO
 from ultralytics.utils.torch_utils import select_device
-
+from sdks.novavision.src.base.download import Download
 from sdks.novavision.src.base.logger import LoggerManager
 from sdks.novavision.src.base.application import Application
 
@@ -19,12 +18,12 @@ def load_model(config: dict):
     application = Application()
 
     # Retrieve parameters from the config.
-    device_type = application.get_param(config=config, name="ConfigDevice")          # "CPU" or "GPU"
-    use_half = application.get_param(config=config, name="Half")                    # True / False
+    device_type = application.get_param(config=config, name="ConfigDevice")  # "CPU" or "GPU"
+    use_half = application.get_param(config=config, name="Half")  # True / False
 
     # Prepare the model path and download it (skip if already available).
     weight_path = download_from_drive_if_not_exists(
-        url="https://drive.google.com/uc?export=download&id=1VXo-WvftAC8M7yWcu0Ysewvl7zmYFP20",
+        url="https://drive.google.com/file/d/1VXo-WvftAC8M7yWcu0Ysewvl7zmYFP20/view?usp=sharing",
         filename="FallDetection.pt"
     )
 
@@ -45,9 +44,10 @@ def load_model(config: dict):
 
 def download_from_drive_if_not_exists(url: str, filename: str, storage_dir="/storage"):
     """
-        Downloads the model file from Google Drive (if it hasn't been downloaded before).
+        Downloads the model file from Google Drive using Download SDK (if it hasn't been downloaded before).
     """
     path = Path(storage_dir) / filename
+
     if path.exists():
         logger.info(f"Model already exists: {path}")
         return str(path)
@@ -55,9 +55,17 @@ def download_from_drive_if_not_exists(url: str, filename: str, storage_dir="/sto
     try:
         logger.info(f"Model is downloading: {filename}")
         Path(storage_dir).mkdir(parents=True, exist_ok=True)
-        urllib.request.urlretrieve(url, str(path))
-        logger.info(f"Model was downloaded successfully: {filename}")
-        return str(path)
+
+
+        download_result = Download.download_from_drive(url, str(path))
+
+        if download_result is not None:
+            logger.info(f"Model was downloaded successfully: {filename}")
+            return str(path)
+        else:
+            logger.error(f"FallDetection - Model could not be downloaded: {filename}")
+            raise Exception(f"Download failed for {filename}")
+
     except Exception as e:
         logger.error(f"FallDetection - Model could not be downloaded: {filename} | Hata: {e}")
         raise e
