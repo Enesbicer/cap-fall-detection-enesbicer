@@ -21,8 +21,6 @@ def load_model(config: dict):
     # Retrieve parameters from the config.
     device_type = application.get_param(config=config, name="ConfigDevice")          # "CPU" or "GPU"
     use_half = application.get_param(config=config, name="Half")                    # True / False
-    conf_thres = application.get_param(config=config, name="ConfidenceThreshold")
-    iou_thres = application.get_param(config=config, name="IoUThreshold")
 
     # Prepare the model path and download it (skip if already available).
     weight_path = download_from_drive_if_not_exists(
@@ -40,10 +38,6 @@ def load_model(config: dict):
     if use_half and device.type != 'cpu':
         model.fuse()
         model = model.half()
-
-    # Apply the threshold values received from the user.
-    model.overrides['conf'] = conf_thres
-    model.overrides['iou'] = iou_thres
 
     logger.info(f"Model loaded: {weight_path} | Device: {device} | FP16: {use_half}")
     return model, device

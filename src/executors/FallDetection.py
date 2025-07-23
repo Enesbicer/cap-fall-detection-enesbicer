@@ -24,11 +24,9 @@ class FallDetection(Capsule):
         self.device_str = self.request.get_param("ConfigDevice")
         self.device = self.bootstrap.get("device")
         self.model = self.bootstrap.get("model")
-
-        self.half = self.request.get_param("Half")
         self.conf_thres = self.request.get_param("ConfidentThreshold")
         self.iou_thres = self.request.get_param("IOUThreshold")
-
+        self.half = self.request.get_param("Half")
         self.image = self.request.get_param("inputImage")
 
     @staticmethod
@@ -36,7 +34,7 @@ class FallDetection(Capsule):
         model, device = load_model(config=config)
         return {
             "model": model,
-            "device": device
+            "device": device,
         }
 
     def infer(self, image):
