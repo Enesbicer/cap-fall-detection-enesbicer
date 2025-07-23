@@ -13,58 +13,57 @@ logger = LoggerManager()
 
 def load_model(config: dict):
     """
-    Google Drive'dan indirilen FallDetection.pt modelini yükler,
-    kullanıcıdan gelen config ayarlarına göre cihaz, FP16, confidence ve IOU threshold ayarlarını uygular.
+        Loads the FallDetection.pt model downloaded from Google Drive,
+        and applies device, FP16, confidence, and IOU threshold settings according to the user-provided config.
     """
     application = Application()
 
-    # Config'ten parametreleri al
-    device_type = application.get_param(config=config, name="ConfigDevice")          # "CPU" ya da "GPU"
+    # Retrieve parameters from the config.
+    device_type = application.get_param(config=config, name="ConfigDevice")          # "CPU" or "GPU"
     use_half = application.get_param(config=config, name="Half")                    # True / False
-    conf_thres = application.get_param(config=config, name="ConfidenceThreshold")   # örn: 0.3
-    iou_thres = application.get_param(config=config, name="IoUThreshold")           # örn: 0.5
+    conf_thres = application.get_param(config=config, name="ConfidenceThreshold")
+    iou_thres = application.get_param(config=config, name="IoUThreshold")
 
-    # Model yolunu hazırla ve indir (varsa atla)
+    # Prepare the model path and download it (skip if already available).
     weight_path = download_from_drive_if_not_exists(
         url="https://drive.google.com/uc?export=download&id=1VXo-WvftAC8M7yWcu0Ysewvl7zmYFP20",
         filename="FallDetection.pt"
     )
 
-    # Cihaz seçimi (GPU varsa ve seçilmişse GPU kullanılır)
+    # Device selection (use GPU if available and selected).
     device = select_device('cuda:0' if device_type == "GPU" and torch.cuda.is_available() else 'cpu')
 
-    # Modeli yükle ve cihaza gönder
+    # Load the model and send it to the device.
     model = YOLO(weight_path).to(device)
 
-    # FP16 desteği gerekiyorsa uygula
+    # Apply FP16 support if required.
     if use_half and device.type != 'cpu':
         model.fuse()
         model = model.half()
 
-    # Kullanıcıdan gelen threshold değerlerini uygula
+    # Apply the threshold values received from the user.
     model.overrides['conf'] = conf_thres
     model.overrides['iou'] = iou_thres
 
-    logger.info(f"Model yüklendi: {weight_path} | Cihaz: {device} | FP16: {use_half}")
+    logger.info(f"Model loaded: {weight_path} | Device: {device} | FP16: {use_half}")
     return model, device
 
 
 def download_from_drive_if_not_exists(url: str, filename: str, storage_dir="/storage"):
     """
-    Google Drive'dan model dosyasını indirir (eğer daha önce indirilmemişse).
-    URL doğrudan uc?id=... formatında olmalı.
+        Downloads the model file from Google Drive (if it hasn't been downloaded before).
     """
     path = Path(storage_dir) / filename
     if path.exists():
-        logger.info(f"Model zaten mevcut: {path}")
+        logger.info(f"Model already exists: {path}")
         return str(path)
 
     try:
-        logger.info(f"Model indiriliyor: {filename}")
+        logger.info(f"Model is downloading: {filename}")
         Path(storage_dir).mkdir(parents=True, exist_ok=True)
         urllib.request.urlretrieve(url, str(path))
-        logger.info(f"Model başarıyla indirildi: {filename}")
+        logger.info(f"Model was downloaded successfully: {filename}")
         return str(path)
     except Exception as e:
-        logger.error(f"FallDetection - Model indirilemedi: {filename} | Hata: {e}")
+        logger.error(f"FallDetection - Model could not be downloaded: {filename} | Hata: {e}")
         raise e
