@@ -39,7 +39,7 @@ def load_model(config: dict):
         model = model.half()
 
     logger.info(f"Model loaded: {weight_path} | Device: {device} | FP16: {use_half}")
-    return model, device
+    return model
 
 
 def download_from_drive_if_not_exists(url: str, filename: str, storage_dir="/storage"):
